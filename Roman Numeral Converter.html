@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101426">
+  <title>Roman Numeral Converter</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101426;
+      --panel: #191f35;
+      --panel-light: #222a44;
+      --text: #f3f5ff;
+      --muted: #9ba5c3;
+      --accent: #a78bfa;
+      --accent-2: #67e8f9;
+      --border: rgba(255, 255, 255, 0.09);
+      --danger: #fda4af;
+      --success: #86efac;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 16px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(ellipse at top left, rgba(167, 139, 250, 0.15), transparent 42%),
+        radial-gradient(ellipse at bottom right, rgba(103, 232, 249, 0.10), transparent 38%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .symbol {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 16px;
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(103, 232, 249, 0.1));
+      color: var(--accent-2);
+      font-family: Georgia, serif;
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 40px);
+      letter-spacing: -1.2px;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .card {
+      padding: 26px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: rgba(25, 31, 53, 0.94);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 5px;
+      margin-bottom: 26px;
+      border-radius: 14px;
+      background: #11172a;
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 10px;
+      padding: 13px 10px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .tab.active {
+      background: var(--panel-light);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    }
+
+    .direction-label {
+      display: block;
+      margin-bottom: 10px;
+      color: #d8def2;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      min-width: 0;
+      width: 100%;
+      padding: 15px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 12px;
+      outline: none;
+      background: #11172a;
+      color: var(--text);
+      font: inherit;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.13);
+    }
+
+    input::placeholder {
+      color: #687391;
+    }
+
+    .clear-btn {
+      flex-shrink: 0;
+      padding: 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel-light);
+      color: var(--muted);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .clear-btn:hover {
+      color: var(--text);
+    }
+
+    .hint {
+      min-height: 20px;
+      margin: 9px 0 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .result {
+      padding: 22px;
+      border: 1px solid rgba(167, 139, 250, 0.22);
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.09), rgba(103, 232, 249, 0.04));
+    }
+
+    .result-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .copy-btn {
+      padding: 7px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #dbe3fa;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .output {
+      min-height: 44px;
+      overflow-wrap: anywhere;
+      color: var(--accent-2);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(27px, 6vw, 40px);
+      font-weight: 700;
+      letter-spacing: 1px;
+      line-height: 1.3;
+    }
+
+    .output.empty {
+      color: #596480;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .message {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      color: var(--danger);
+    }
+
+    .message.success {
+      color: var(--success);
+    }
+
+    .examples {
+      margin-top: 24px;
+    }
+
+    .examples-title {
+      margin: 0 0 12px;
+      color: #d8def2;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .example-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .example {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.025);
+      color: #c5cde3;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .example:hover {
+      border-color: rgba(167, 139, 250, 0.5);
+      background: rgba(167, 139, 250, 0.08);
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .legend-item {
+      padding: 10px 4px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.025);
+      text-align: center;
+    }
+
+    .legend-symbol {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-family: Georgia, serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .legend-value {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      color: #77819f;
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 24px 12px;
+      }
+
+      .card {
+        padding: 19px;
+        border-radius: 19px;
+      }
+
+      .legend {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .input-row {
+        gap: 7px;
+      }
+
+      .clear-btn {
+        padding: 0 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="symbol" aria-hidden="true">XIV</div>
+      <h1>Roman Numeral Converter</h1>
+      <p class="subtitle">Convert numbers to Roman numerals and back again.</p>
+    </header>
+
+    <section class="card">
+      <div class="tabs" role="tablist" aria-label="Conversion direction">
+        <button class="tab active" id="toRomanTab" role="tab" aria-selected="true" type="button">
+          Number → Roman
+        </button>
+        <button class="tab" id="toNumberTab" role="tab" aria-selected="false" type="button">
+          Roman → Number
+        </button>
+      </div>
+
+      <label class="direction-label" id="inputLabel" for="numberInput">Enter a whole number</label>
+      <div class="input-row">
+        <input
+          id="numberInput"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Try 2026"
+          aria-describedby="inputHint message"
+        >
+        <button class="clear-btn" id="clearBtn" type="button">Clear</button>
+      </div>
+
+      <p class="hint" id="inputHint">Supported range: 1–3,999.</p>
+
+      <div class="result" aria-live="polite" aria-atomic="true">
+        <div class="result-heading">
+          <span class="result-label" id="resultLabel">Roman numeral</span>
+          <button class="copy-btn" id="copyBtn" type="button">Copy result</button>
+        </div>
+        <div class="output empty" id="output">Your result will appear here</div>
+        <p class="message" id="message">Enter a number to begin.</p>
+      </div>
+
+      <section class="examples">
+        <h2 class="examples-title">Try an example</h2>
+        <div class="example-list" id="exampleList"></div>
+      </section>
+
+      <div class="legend" aria-label="Roman numeral symbols">
+        <div class="legend-item"><span class="legend-symbol">I</span><span class="legend-value">1</span></div>
+        <div class="legend-item"><span class="legend-symbol">V</span><span class="legend-value">5</span></div>
+        <div class="legend-item"><span class="legend-symbol">X</span><span class="legend-value">10</span></div>
+        <div class="legend-item"><span class="legend-symbol">L</span><span class="legend-value">50</span></div>
+        <div class="legend-item"><span class="legend-symbol">C</span><span class="legend-value">100</span></div>
+        <div class="legend-item"><span class="legend-symbol">D</span><span class="legend-value">500</span></div>
+        <div class="legend-item"><span class="legend-symbol">M</span><span class="legend-value">1000</span></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Roman numerals traditionally represent positive whole numbers. This converter supports standard notation from 1 to 3,999.
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const numberInput = document.getElementById("numberInput");
+    const inputLabel = document.getElementById("inputLabel");
+    const inputHint = document.getElementById("inputHint");
+    const output = document.getElementById("output");
+    const message = document.getElementById("message");
+    const resultLabel = document.getElementById("resultLabel");
+    const toRomanTab = document.getElementById("toRomanTab");
+    const toNumberTab = document.getElementById("toNumberTab");
+    const clearBtn = document.getElementById("clearBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const exampleList = document.getElementById("exampleList");
+
+    let mode = "toRoman";
+    let currentResult = "";
+
+    const romanValues = [
+      [1000, "M"],
+      [900, "CM"],
+      [500, "D"],
+      [400, "CD"],
+      [100, "C"],
+      [90, "XC"],
+      [50, "L"],
+      [40, "XL"],
+      [10, "X"],
+      [9, "IX"],
+      [5, "V"],
+      [4, "IV"],
+      [1, "I"]
+    ];
+
+    const examples = {
+      toRoman: ["4", "9", "42", "99", "2026", "3999"],
+      toNumber: ["IV", "IX", "XLII", "XCIX", "MMXXVI", "MMMCMXCIX"]
+    };
+
+    function numberToRoman(number) {
+      if (!Number.isInteger(number) || number < 1 || number > 3999) {
+        throw new Error("Enter a whole number from 1 to 3,999.");
+      }
+
+      let remaining = number;
+      let roman = "";
+
+      for (const [value, symbol] of romanValues) {
+        while (remaining >= value) {
+          roman += symbol;
+          remaining -= value;
+        }
+      }
+
+      return roman;
+    }
+
+    function romanToNumber(roman) {
+      const normalized = roman.toUpperCase();
+      let total = 0;
+      let index = 0;
+
+      while (index < normalized.length) {
+        const current = getRomanValue(normalized[index]);
+        const next = index + 1 < normalized.length
+          ? getRomanValue(normalized[index + 1])
+          : 0;
+
+        if (current === 0) {
+          throw new Error("Use only the Roman numeral symbols I, V, X, L, C, D and M.");
+        }
+
+        if (next > current) {
+          total += next - current;
+          index += 2;
+        } else {
+          total += current;
+          index += 1;
+        }
+      }
+
+      if (total < 1 || total > 3999 || numberToRoman(total) !== normalized) {
+        throw new Error("That is not a valid standard Roman numeral. Try a form such as XIV or MCMXCIX.");
+      }
+
+      return total;
+    }
+
+    function getRomanValue(symbol) {
+      const values = {
+        I: 1,
+        V: 5,
+        X: 10,
+        L: 50,
+        C: 100,
+        D: 500,
+        M: 1000
+      };
+
+      return values[symbol] || 0;
+    }
+
+    function setMessage(text, type = "") {
+      message.textContent = text;
+      message.className = "message" + (type ? " " + type : "");
+    }
+
+    function showResult(value) {
+      currentResult = String(value);
+      output.textContent = currentResult;
+      output.classList.remove("empty");
+      copyBtn.disabled = false;
+      copyBtn.style.opacity = "1";
+    }
+
+    function clearResult() {
+      currentResult = "";
+      output.textContent = "Your result will appear here";
+      output.classList.add("empty");
+      copyBtn.disabled = true;
+      copyBtn.style.opacity = "0.5";
+    }
+
+    function convert() {
+      const raw = numberInput.value.trim();
+
+      if (!raw) {
+        clearResult();
+        setMessage("Enter a value to begin.");
+        return;
+      }
+
+      try {
+        if (mode === "toRoman") {
+          if (!/^\d+$/.test(raw)) {
+            throw new Error("Enter digits only, without decimals or signs.");
+          }
+
+          const number = Number(raw);
+
+          if (!Number.isSafeInteger(number)) {
+            throw new Error("That number is too large.");
+          }
+
+          showResult(numberToRoman(number));
+          setMessage(`${number.toLocaleString()} converted successfully.`, "success");
+        } else {
+          if (!/^[IVXLCDM]+$/i.test(raw)) {
+            throw new Error("Enter Roman numeral letters only: I, V, X, L, C, D or M.");
+          }
+
+          const number = romanToNumber(raw);
+          showResult(number.toLocaleString());
+          setMessage(`${raw.toUpperCase()} converted successfully.`, "success");
+        }
+      } catch (error) {
+        clearResult();
+        setMessage(error.message, "error");
+      }
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const romanMode = mode === "toRoman";
+
+      toRomanTab.classList.toggle("active", romanMode);
+      toNumberTab.classList.toggle("active", !romanMode);
+
+      toRomanTab.setAttribute("aria-selected", String(romanMode));
+      toNumberTab.setAttribute("aria-selected", String(!romanMode));
+
+      inputLabel.textContent = romanMode
+        ? "Enter a whole number"
+        : "Enter a Roman numeral";
+
+      numberInput.placeholder = romanMode ? "Try 2026" : "Try MMXXVI";
+      numberInput.inputMode = romanMode ? "numeric" : "text";
+
+      inputHint.textContent = romanMode
+        ? "Supported range: 1–3,999."
+        : "Use standard Roman notation, such as XIV or MMXXVI.";
+
+      resultLabel.textContent = romanMode ? "Roman numeral" : "Number";
+      renderExamples();
+      numberInput.value = "";
+      clearResult();
+      setMessage("Enter a value to begin.");
+      numberInput.focus();
+    }
+
+    function renderExamples() {
+      exampleList.replaceChildren();
+
+      for (const example of examples[mode]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "example";
+        button.textContent = mode === "toRoman"
+          ? `${example} → ${numberToRoman(Number(example))}`
+          : `${example} → ${romanToNumber(example).toLocaleString()}`;
+
+        button.addEventListener("click", () => {
+          numberInput.value = example;
+          convert();
+        });
+
+        exampleList.appendChild(button);
+      }
+    }
+
+    async function copyResult() {
+      if (!currentResult) return;
+
+      try {
+        await navigator.clipboard.writeText(currentResult);
+        setMessage("Result copied to clipboard.", "success");
+      } catch {
+        const temporaryInput = document.createElement("textarea");
+        temporaryInput.value = currentResult;
+        temporaryInput.style.position = "fixed";
+        temporaryInput.style.opacity = "0";
+        document.body.appendChild(temporaryInput);
+        temporaryInput.select();
+
+        const copied = document.execCommand("copy");
+        temporaryInput.remove();
+
+        setMessage(
+          copied ? "Result copied to clipboard." : "Copy failed. Select and copy the result manually.",
+          copied ? "success" : "error"
+        );
+      }
+    }
+
+    toRomanTab.addEventListener("click", () => setMode("toRoman"));
+    toNumberTab.addEventListener("click", () => setMode("toNumber"));
+
+    numberInput.addEventListener("input", convert);
+
+    clearBtn.addEventListener("click", () => {
+      numberInput.value = "";
+      clearResult();
+      setMessage("Cleared. Enter a new value.");
+      numberInput.focus();
+    });
+
+    copyBtn.addEventListener("click", copyResult);
+
+    numberInput.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        numberInput.value = "";
+        clearResult();
+        setMessage("Cleared. Enter a new value.");
+      }
+    });
+
+    copyBtn.disabled = true;
+    copyBtn.style.opacity = "0.5";
+    renderExamples();
+  </script>
+</body>
+</html>
